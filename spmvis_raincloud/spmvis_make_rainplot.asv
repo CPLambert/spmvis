@@ -1,0 +1,145 @@
+function spmvis_make_rainplot(data,rcdensity,options,k,weights,mm,ms)
+%% function spmvis_make_rainplot(data,rcdensity,options,k,weights,mm,ms)
+% This creates raincloud plots
+data(isnan(data)) = [];
+
+if k==1
+    figure('NumberTitle', 'off', 'Name', options.title);set(gcf,'color','w');
+    set(gcf,'Position',options.figdims);
+end
+
+if ~strcmp(options.type,'paired') %Paired is a special case
+if ~strcmp(options.type,'overlap')
+    if options.subplot
+        h1=subplot(options.subplotset(1),options.subplotset(2),options.subplotorder(k));
+    end
+end
+
+if ~isempty(options.label)
+    if numel(options.label)==1
+        label=options.label;
+    else
+        label=options.label{k};
+    end
+else
+    label='';
+end
+
+if iscell(label),label=cell2mat(label);end
+
+if contains(label,'_')
+    dash=strfind(label,'_');
+    label(dash)=32;
+end
+
+if strcmp(options.type,'horizontal')
+    h1=subplot(options.subplotset(1),options.subplotset(2),options.subplotorder((k*2)-1));
+    options.ylimits = [0 1.1];
+end
+
+area(rcdensity.b{k},rcdensity.a{k},'FaceColor', options.col(k,:), 'EdgeColor', [0.1 0.1 0.1], 'LineWidth', 2);hold on;
+ylim([options.ylimits]);xlim([options.xlimits]);
+
+if strcmp(options.type,'horizontal')
+    xlabel(label);
+end
+
+if ~isempty(options.xticks)
+    xticks([options.xticks]);
+end
+
+if ~isempty(options.xticklabels)
+    xticklabels(options.xticklabels);
+end
+
+if strcmp(options.type,'horizontal')
+    h1=subplot(options.subplotset(1),options.subplotset(2),options.subplotorder((k*2)));
+    options.ylimits = [0 1];
+    options.position = 0.5;
+end
+
+if strcmp(options.type,'overlap')
+    options.position = options.position - k;
+    options.ylimits = [(options.position-1) 1];
+    hold on
+end
+
+% jitter for scatter plot
+jit         = (rand(size(data)) - 0.5) * options.width;
+
+% Add scatter plot
+if isempty(weights)
+    scatter(data,jit + options.position,'MarkerFaceColor',options.col(k,:),'MarkerEdgeColor','k','SizeData',20);hold on;
+else
+    sf=(ceil(weights))+5;
+    for iii=1:numel(jit)
+        scatter(data(iii),jit(iii) + options.position,'MarkerFaceColor',options.col(k,:),'MarkerEdgeColor','k','SizeData',sf(iii));hold on;
+    end
+end
+
+% info for making boxplot in paper: Quartiles, mean, 2*sd
+if isempty(mm)
+    Y           = [quantile(data,[0.25 0.75]) mean(data) mean(data)-2*(std(data)) mean(data)+2*(std((data)))];
+    rectangle('Position',[Y(1) options.position-(options.width*0.5) Y(2)-Y(1) options.width],'EdgeColor','k','LineWidth',2);hold on
+    % Add std:
+    line([Y(2) Y(5)],[options.position options.position],'col','k','LineWidth',2);hold on
+    line([Y(1) Y(4)],[options.position options.position],'col','k','LineWidth',2);hold on
+
+else %Manually define - For weighted means and pooled variancesa
+    Y           = [prctile(data,[25 75]) mm mm-2*(ms) mm+2*(ms)];
+    rectangle('Position',[Y(4) options.position-(options.width*0.5) Y(5)-Y(4) options.width],'EdgeColor','k','LineWidth',2);hold on
+
+end
+
+% Add box:
+
+% Add mean:
+line([Y(3) Y(3)],[options.position-0.4 options.position+0.4],'col','k','LineWidth',2);hold on
+
+% Tidy up axis
+if options.subplot && ~strcmp(options.type,'overlap')
+    set(gca,'ytick',[]);set(gca,'yticklabel',[]);
+    if ~strcmp(options.type,'horizontal') %Aesthetics
+        xlabel(h1,label);
+    end
+else
+    set(gca,'ytick',[]);set(gca,'yticklabel',[]);xlabel({label});
+end
+
+if ~isempty(options.fontsize)
+    set(gca,'fontsize',options.fontsize);
+end
+
+ylim([options.ylimits]);xlim([options.xlimits]);
+
+else
+
+for k=1:numel(options.testretest.tasks)
+    post=k*2;
+%subplot(1,numel(options.testretest.tasks),k)
+clear jit1 jit2 x
+      x=[duration{1,k}(:) duration{2,k}(:)];
+      
+[f1,x1] = ksdensity(x(:,1));
+f1=post+(((f1./(max(f1))).*sc)+thr);
+h1(i)=fill(f1,x1,col(k,:)),hold on
+jit1 = post+(ones(size(x(:,1))).*thr.*wdt);
+
+
+scatter(jit1,x(:,1),'MarkerFaceColor',col(k,:),'MarkerEdgeColor','k','SizeData',25);hold on;
+
+
+[f2,x2] = ksdensity(x(:,2));
+f2=post+(((f2./(max(f2))).*-sc)-thr);
+h2(i)=fill(f2,x2,col(k,:)),hold on;
+jit2 = post+((ones(size(x(:,1))).*thr.*-wdt));
+scatter(jit2,x(:,2),'MarkerFaceColor',col(k,:),'MarkerEdgeColor','k','SizeData',25);hold on;
+plot([jit1 jit2]',x','Color',col(k,:),'MarkerFaceColor',col(k,:),'MarkerEdgeColor','k')
+end
+xticks([2 :2:18]);
+xticklabels({'Walk 01','Walk 02','Walk 03','Turn 01','Turn 02','Turn 03', 'Return 01','Return 02','Return 03'});
+ ylim([0 12]);
+
+end
+
+end

@@ -1,0 +1,132 @@
+function dataopts= tbx_scfg_spmvis_adddataopts(type)
+%% dataopts= tbx_scfg_spmvis_adddataopts
+% Add data options
+%__________________________________________________________________________
+% Version History:
+% Version 1.0, April 2023
+%--------------------------------------------------------------------------
+% C.Lambert - Wellcome Centre for Human Neuroimaging
+%--------------------------------------------------------------------------
+
+if nargin<1
+    type=[];
+end
+
+% ---------------------------------------------------------------------
+% Add data
+% ---------------------------------------------------------------------
+addvec           = cfg_entry;
+addvec.tag       = 'addvar';
+addvec.name      = 'Add data vector';
+addvec.help    = {'Add data vector'};
+addvec.strtype = 'e';
+addvec.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% Plot mean/median
+% ---------------------------------------------------------------------
+addstat             = cfg_menu;
+addstat.tag         = 'addstat';
+addstat.name        = 'Add line to density plots';
+addstat.labels      = {'None','Mean - Dashed','Mean - Solid', 'Median - Dashed','Median - Solid'};
+addstat.values      = [{'none'} {'mean-dash'} {'mean-solid'} {'median-dash'} {'median-solid'}];
+addstat.val     = {'mean-dash'};
+addstat.help        = {'Add a line showing cental tendency (mean/median) to the density plot'};
+
+% ---------------------------------------------------------------------
+% Add data
+% ---------------------------------------------------------------------
+addvec1           = cfg_entry;
+addvec1.tag       = 'addvar1';
+addvec1.name      = 'Add data vector 1';
+addvec1.help    = {'Paired plot: Add data vector 1'};
+addvec1.strtype = 'e';
+addvec1.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% Add data
+% ---------------------------------------------------------------------
+addvec2           = cfg_entry;
+addvec2.tag       = 'addvar2';
+addvec2.name      = 'Add data vector 2';
+addvec2.help    = {'Paired plot: Add data vector 2'};
+addvec2.strtype = 'e';
+addvec2.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% Link plots
+% ---------------------------------------------------------------------
+linkvec             = cfg_menu;
+linkvec.tag         = 'linkvec';
+linkvec.name        = 'Plot link between data points';
+linkvec.labels      = {'Yes','No'};
+linkvec.values      = [{1} {0}];
+linkvec.val     = {1};
+linkvec.help        = {'Plot line between matching data points'};
+
+linkalpha           = cfg_entry;
+linkalpha.tag       = 'linkalpha';
+linkalpha.name      = 'Linking plot alpha';
+linkalpha.help    = {'Opacity of linking plot (1 = opaque, 0 = transparent)'};
+linkalpha.strtype = 'e';
+linkalpha.val = {1};
+linkalpha.num     = [1 1];
+
+linkwidth          = cfg_entry;
+linkwidth.tag       = 'linkwidth';
+linkwidth.name      = 'Linking plot width';
+linkwidth.help    = {'Line-width linking plot'};
+linkwidth.strtype = 'e';
+linkwidth.val = {0.5};
+linkwidth.num     = [1 1];
+% ---------------------------------------------------------------------
+% Label data
+% ---------------------------------------------------------------------
+vec2lab           = cfg_entry;
+vec2lab.tag       = 'vec2lab';
+vec2lab.name      = 'Data label';
+vec2lab.help    = {'Add label for data (for annotating plots)'};
+vec2lab.strtype = 's';
+vec2lab.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% Number in this group
+% ---------------------------------------------------------------------
+vec2col           = cfg_entry;
+vec2col.tag       = 'vec2col';
+vec2col.name      = 'Colour?';
+vec2col.help    = {'Select colour number (use "Test colour palette" to see mapping). Otherwise mapping will simply be sequential'};
+vec2col.strtype = 'e';
+vec2col.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% Subplot position
+% ---------------------------------------------------------------------
+subplotpos           = cfg_entry;
+subplotpos.tag       = 'subplotpos';
+subplotpos.name      = 'Subplot position?';
+subplotpos.help    = {'Select subplot position number, otherwise subplots will simply be sequential'};
+subplotpos.strtype = 'e';
+subplotpos.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% data options
+% ---------------------------------------------------------------------
+if strcmp(type,'subrain')
+dataopts              = cfg_repeat;
+dataopts.tag          = 'dataopts';
+dataopts.name         = 'Add new data vector';
+dataopts.values       = {addvec vec2lab vec2col subplotpos addstat};
+dataopts.val          = {addvec};
+dataopts.help         = {'Add data (plus other plot options). Note add new per each data vector (i.e. There should only be at most ONE of each field in the options below, or the code may not work).'};
+end
+
+if strcmp(type,'pair')
+dataopts              = cfg_repeat;
+dataopts.tag          = 'dataopts';
+dataopts.name         = 'Add new data vector';
+dataopts.values       = {addvec1 addvec2 linkvec vec2lab vec2col addstat linkalpha linkwidth};
+dataopts.val          = {addvec1 addvec2 linkvec};
+dataopts.help         = {'Paired plots: Add data (plus other plot options)'};
+end
+end
